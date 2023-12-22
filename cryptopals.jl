@@ -80,22 +80,6 @@ function score_word(s)
 	return acc
 end
 
-# ╔═╡ f33e8c30-90a3-434c-b412-9beb12197bef
-begin
-	pairs = []
-	for i=0:127
-		b = String(UInt8.(broadcast(⊻, s, i))) 
-		|> x -> strip(x) 
-		|> x -> replace(x, '\n' => "", '\r' => "")
-		score = score_word(b)
-		push!(pairs, (b, score))
-	end
-	sort!(pairs, by=x->x[2], rev=true)
-	for i=1:3
-		@printf "idx is %02d, %s\n" i pairs[i][1]
-	end
-end
-
 # ╔═╡ 4450d995-897d-4453-a59a-369751556cc2
 function brute_force_xor(s)
 	"""
@@ -105,10 +89,32 @@ function brute_force_xor(s)
 	pairs = []
 	for i=0:127
 		b = String(UInt8.(broadcast(⊻, s, i))) |> x -> strip(x) |> x -> replace(x, '\n' => "", '\r' => "")
-		push!(pairs, b)
+		score = score_word(b)
+		push!(pairs, (b,score))
 	end
 	return pairs
 end
+
+# ╔═╡ d23f1300-3593-44c6-aeb0-c667341dc7eb
+begin
+	a::Vector{Tuple{String, UInt64}} = brute_force_xor(
+		"1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
+	)
+
+	sort!(a, by=x->x[2], rev=true)
+
+	@printf "%s\n" a[1][1]
+end
+
+# ╔═╡ 37b59f76-06b4-4f71-9fa5-6a0edeb3e1cf
+function decrypt_xor(s)
+	results = brute_force_xor(s)
+	sort!(results, by=x->x[2], rev=true)
+	return results[1][1]
+end
+
+# ╔═╡ d02676bc-b87d-4f4a-a6e1-51babc190060
+decrypt_xor("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736")
 
 # ╔═╡ ef78056b-2cc6-48fc-af8a-955390acaa52
 # In general, jungle weather is hot, humid, and characterized by sudden changes.
@@ -443,11 +449,17 @@ strings = [
 "4c071a57e9356ee415103c5c53e254063f2019340969e30a2e381d5b2555",
 "32042f46431d2c44607934ed180c1028136a5f2b26092e3b2c4e2930585a"]
 
-# ╔═╡ f7960d6d-e514-4d80-84ea-bf93b08c35fd
-str = [brute_force_xor(s) for s in strings]
+# ╔═╡ 78e1005f-b352-4688-bf03-23c8027fdc22
+for (i,s) in enumerate(strings)
+	@printf "idx[%03d] %s\n" i decrypt_xor(s)
+end
 
-# ╔═╡ c26087f5-3545-4688-b43f-34387c02f86a
+# from this, we conclude that 171 is the correct one.
 
+# ╔═╡ 54864926-2ac6-45fc-814f-224d4da979ce
+begin
+	@printf "%s\n translates too...\n%s" strings[171] decrypt_xor(strings[171])
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -537,10 +549,12 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 # ╠═6ceae36b-2cb0-4c23-aecc-d6205abcf9f1
 # ╠═39d14348-c2b7-4c60-ba87-3315af278ab2
 # ╠═3c466253-5fa0-4b1a-9a42-fc22d3a155c0
-# ╠═f33e8c30-90a3-434c-b412-9beb12197bef
+# ╠═d23f1300-3593-44c6-aeb0-c667341dc7eb
+# ╠═37b59f76-06b4-4f71-9fa5-6a0edeb3e1cf
+# ╠═d02676bc-b87d-4f4a-a6e1-51babc190060
 # ╠═4450d995-897d-4453-a59a-369751556cc2
-# ╠═ef78056b-2cc6-48fc-af8a-955390acaa52
-# ╠═f7960d6d-e514-4d80-84ea-bf93b08c35fd
-# ╠═c26087f5-3545-4688-b43f-34387c02f86a
+# ╟─ef78056b-2cc6-48fc-af8a-955390acaa52
+# ╠═78e1005f-b352-4688-bf03-23c8027fdc22
+# ╠═54864926-2ac6-45fc-814f-224d4da979ce
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
