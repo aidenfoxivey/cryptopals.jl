@@ -461,6 +461,63 @@ begin
 	@printf "%s\n translates too...\n%s" strings[171] decrypt_xor(strings[171])
 end
 
+# ╔═╡ 9637dc4e-86ec-4025-8901-e92db91ecc4f
+function xor_repkey_encrypt(s, key)
+	s = Vector{UInt8}(s)
+	key = Vector{UInt8}(key)
+	keylen = length(key)
+
+	len = UInt(floor(length(s)/length(key)))
+
+	new_key = repeat(key, len)
+
+	diff = length(s) - length(new_key)
+
+	for i=1:diff
+		push!(new_key, key[i % keylen])
+	end
+
+	xored = broadcast(⊻, s, new_key)
+	bytes2hex(xored)
+end
+
+# ╔═╡ f2388af9-48ca-427c-8684-9285afa18a14
+function xor_repkey_decrypt(s, key)
+	s = hex2bytes(s)
+	key = Vector{UInt8}(key)
+	keylen = length(key)
+
+	len = UInt(floor(length(s)/length(key)))
+
+	new_key = repeat(key, len)
+
+	diff = length(s) - length(new_key)
+
+	for i=1:diff
+		push!(new_key, key[i % keylen])
+	end
+
+	xored = broadcast(⊻, s, new_key)
+	String(xored)
+end
+
+# ╔═╡ a634150e-af74-4ace-9dc8-939fd43da24f
+begin
+	stanza = 
+		"Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal"
+	
+	mine = xor_repkey_encrypt(stanza, "ICE")
+
+	theirs = "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f"
+
+	println(theirs == mine)
+
+	println(theirs)
+	println(mine)
+
+	println(xor_repkey_decrypt(theirs, "ICE"))
+end
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -556,5 +613,8 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 # ╟─ef78056b-2cc6-48fc-af8a-955390acaa52
 # ╠═78e1005f-b352-4688-bf03-23c8027fdc22
 # ╠═54864926-2ac6-45fc-814f-224d4da979ce
+# ╠═9637dc4e-86ec-4025-8901-e92db91ecc4f
+# ╠═f2388af9-48ca-427c-8684-9285afa18a14
+# ╠═a634150e-af74-4ace-9dc8-939fd43da24f
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
